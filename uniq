@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+import sys
+
+countMap = {}
+countSet = set()
+outList = []
+allLines = []
+
+
+def createOutput(state):
+    with open(state['filename'], 'r') as file:
+        for line in file:
+            countMap[line] = countMap.get(line, 0) + 1
+            countSet.add(line)
+            allLines.append(line)
+    outFile = open(state['output_file'], 'w') if state['output_file'] else sys.stdout
+    for line in allLines:
+        outputLine = ''
+        if state['count']:
+            outputLine = str(countMap[line]) + " " + line
+        else:
+            outputLine = line
+
+        if line in countSet:
+            countSet.remove(line)
+        else:
+            outputLine = ""
+
+        if state['repeated']:
+            if countMap[line] <= 1:
+                outputLine = ""
+
+        if state['unique']:
+            if countMap[line] > 1:
+                outputLine = ""
+        if outputLine:
+            print(outputLine, end="", file=outFile)
+
+            
+def returnState(args):
+    state = {
+            'count': False,
+            'repeated': False,
+            'unique': False,
+            'filename': None,
+            'output_file': False
+
+    }
+    foundFile = False
+    foundOutputFile = False
+    for arg in args:
+        if len(arg):
+            if arg[0] == '-':
+                if arg == '-c':
+                    state['count'] = True
+                if arg == '-d':
+                    state['repeated'] = True
+                if arg == '-u':
+                    state['unique'] = True
+                if arg == '-':
+                    foundFile = True
+                    state['filename'] = None
+            elif not foundFile:
+                state['filename'] = arg
+                foundFile = True
+            elif not foundOutputFile:
+                state['output_file'] = arg
+            else:
+                print("Error in the formatting")
+                exit(1)
+    if state['unique'] and state['repeated']:
+        print('conflicting options: unique and repeated cannot both exist together')
+        exit(1)
+    return state
+
+            
+state = returnState(sys.argv[1:])
+createOutput(state)
+
+
+#filename = input() if not state['filename'] else state['filename']
+#outputFileName = state['output_file']
+#print(filename, outputFileName)
+#print(state)
+#readInputFile(filename)
+#print(countMap)
+

@@ -1,0 +1,10 @@
+def readInputFile(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            print(line)
+
+
+
+filename = input("filename:")
+readInputFile(filename)
+
